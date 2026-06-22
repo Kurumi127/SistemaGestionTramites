@@ -2,6 +2,8 @@ package com.Sistema.GestionTramites.service;
 
 import com.Sistema.GestionTramites.dto.AreaServicioRequestDTO;
 import com.Sistema.GestionTramites.enums.EstadoGeneral;
+import com.Sistema.GestionTramites.exeption.BadRequestException;
+import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.AreaServicio;
 import com.Sistema.GestionTramites.repository.AreaServicioRepository;
 import org.springframework.stereotype.Service;
@@ -23,12 +25,12 @@ public class AreaServicioService {
 
     public AreaServicio obtenerPorId(Integer id) {
         return areaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Área no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Área no encontrada"));
     }
 
     public AreaServicio crearArea(AreaServicioRequestDTO dto) {
         if (areaRepository.existsByNombre(dto.getNombre())) {
-            throw new RuntimeException("Ya existe un área con ese nombre");
+            throw new BadRequestException("Ya existe un área con ese nombre");
         }
 
         AreaServicio area = new AreaServicio();

@@ -3,6 +3,7 @@ package com.Sistema.GestionTramites.service;
 import com.Sistema.GestionTramites.dto.ActualizarEstadoSolicitudDTO;
 import com.Sistema.GestionTramites.dto.SolicitudRequestDTO;
 import com.Sistema.GestionTramites.enums.EstadoSolicitud;
+import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.*;
 import com.Sistema.GestionTramites.repository.*;
 import org.springframework.stereotype.Service;
@@ -35,10 +36,10 @@ public class SolicitudServicioService {
 
     public SolicitudServicio crearSolicitud(SolicitudRequestDTO dto) {
         Servicio servicio = servicioRepository.findById(dto.getIdServicio())
-                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
 
         UsuarioSistema usuario = usuarioRepository.findById(dto.getIdUsuarioRegistra())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Solicitante solicitante = new Solicitante();
         solicitante.setNombreCompleto(dto.getNombreCompleto());
@@ -66,7 +67,7 @@ public class SolicitudServicioService {
 
     public SolicitudServicio actualizarEstado(Integer idSolicitud, ActualizarEstadoSolicitudDTO dto) {
         SolicitudServicio solicitud = solicitudRepository.findById(idSolicitud)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
 
         EstadoSolicitud nuevoEstado = EstadoSolicitud.valueOf(dto.getEstado());
 

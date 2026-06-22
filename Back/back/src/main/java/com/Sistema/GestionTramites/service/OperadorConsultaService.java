@@ -1,6 +1,8 @@
 package com.Sistema.GestionTramites.service;
 
 import com.Sistema.GestionTramites.enums.TipoUsuario;
+import com.Sistema.GestionTramites.exeption.BadRequestException;
+import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.*;
 import com.Sistema.GestionTramites.repository.OperadorAreaRepository;
 import com.Sistema.GestionTramites.repository.ServicioRepository;
@@ -70,10 +72,10 @@ public class OperadorConsultaService {
 
     private UsuarioSistema validarOperador(Integer idUsuario) {
         UsuarioSistema usuario = usuarioRepository.findById(idUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         if (usuario.getTipoUsuario() != TipoUsuario.OPERADOR) {
-            throw new RuntimeException("El usuario no es operador");
+            throw new BadRequestException("El usuario no es operador");
         }
 
         return usuario;

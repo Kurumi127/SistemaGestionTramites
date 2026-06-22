@@ -3,6 +3,8 @@ package com.Sistema.GestionTramites.service;
 import com.Sistema.GestionTramites.dto.UsuarioSistemaRequestDTO;
 import com.Sistema.GestionTramites.enums.EstadoGeneral;
 import com.Sistema.GestionTramites.enums.TipoUsuario;
+import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
+import com.Sistema.GestionTramites.exeption.BadRequestException;
 import com.Sistema.GestionTramites.model.UsuarioSistema;
 import com.Sistema.GestionTramites.repository.UsuarioSistemaRepository;
 import org.springframework.stereotype.Service;
@@ -28,12 +30,12 @@ public class UsuarioSistemaService {
 
     public UsuarioSistema obtenerPorId(Integer id) {
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     public UsuarioSistema crearUsuario(UsuarioSistemaRequestDTO dto) {
         if (usuarioRepository.existsByCorreo(dto.getCorreo())) {
-            throw new RuntimeException("Ya existe un usuario con ese correo");
+            throw new BadRequestException("Ya existe un usuario con ese correo");
         }
 
         TipoUsuario tipoUsuario = TipoUsuario.valueOf(dto.getTipoUsuario());
@@ -45,7 +47,7 @@ public class UsuarioSistemaService {
                     .isPresent();
 
             if (yaExisteAdministrador) {
-                throw new RuntimeException("Solo puede existir un administrador en el sistema");
+                throw new BadRequestException("Solo puede existir un administrador en el sistema");
             }
         }
 
@@ -71,7 +73,7 @@ public class UsuarioSistemaService {
 
         usuarioRepository.findByCorreo(dto.getCorreo()).ifPresent(usuarioExistente -> {
             if (!usuarioExistente.getIdUsuario().equals(id)) {
-                throw new RuntimeException("Ya existe otro usuario con ese correo");
+                throw new BadRequestException("Ya existe otro usuario con ese correo");
             }
         });
 

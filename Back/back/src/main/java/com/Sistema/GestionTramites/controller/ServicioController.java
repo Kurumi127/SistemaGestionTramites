@@ -2,6 +2,7 @@ package com.Sistema.GestionTramites.controller;
 
 import com.Sistema.GestionTramites.dto.ServicioRequestDTO;
 import com.Sistema.GestionTramites.enums.EstadoGeneral;
+import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.AreaServicio;
 import com.Sistema.GestionTramites.model.Servicio;
 import com.Sistema.GestionTramites.repository.AreaServicioRepository;
@@ -34,7 +35,7 @@ public class ServicioController {
     @GetMapping("/{id}")
     public Servicio obtenerServicio(@PathVariable Integer id) {
         return servicioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
     }
 
     @GetMapping("/area/{idArea}")
@@ -45,7 +46,7 @@ public class ServicioController {
     @PostMapping
     public Servicio crearServicio(@RequestBody ServicioRequestDTO dto) {
         AreaServicio area = areaServicioRepository.findById(dto.getIdArea())
-                .orElseThrow(() -> new RuntimeException("Área no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Área no encontrada"));
 
         Servicio servicio = new Servicio();
         servicio.setNumeroServicio(dto.getNumeroServicio());
@@ -72,10 +73,10 @@ public class ServicioController {
             @RequestBody ServicioRequestDTO dto
     ) {
         Servicio servicio = servicioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
 
         AreaServicio area = areaServicioRepository.findById(dto.getIdArea())
-                .orElseThrow(() -> new RuntimeException("Área no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Área no encontrada"));
 
         servicio.setNumeroServicio(dto.getNumeroServicio());
         servicio.setNombre(dto.getNombre());
@@ -92,7 +93,7 @@ public class ServicioController {
     @DeleteMapping("/{id}")
     public void eliminarServicio(@PathVariable Integer id) {
         Servicio servicio = servicioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
 
         servicioRepository.delete(servicio);
     }

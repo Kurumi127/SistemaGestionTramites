@@ -3,6 +3,7 @@ package com.Sistema.GestionTramites.controller;
 import com.Sistema.GestionTramites.dto.ActualizarEstadoSolicitudDTO;
 import com.Sistema.GestionTramites.dto.SolicitudRequestDTO;
 import com.Sistema.GestionTramites.enums.EstadoSolicitud;
+import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.SolicitudServicio;
 import com.Sistema.GestionTramites.repository.SolicitudServicioRepository;
 import com.Sistema.GestionTramites.service.SolicitudServicioService;
@@ -35,7 +36,7 @@ public class SolicitudServicioController {
     @GetMapping("/{id}")
     public SolicitudServicio obtenerSolicitud(@PathVariable Integer id) {
         return solicitudRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
     }
 
     @GetMapping("/area/{idArea}")
@@ -59,7 +60,7 @@ public class SolicitudServicioController {
     @PutMapping("/{id}/cancelar")
     public SolicitudServicio cancelarSolicitud(@PathVariable Integer id) {
         SolicitudServicio solicitud = solicitudRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
 
         solicitud.setEstado(EstadoSolicitud.CANCELADA);
         solicitud.setFechaActualizacion(LocalDateTime.now());

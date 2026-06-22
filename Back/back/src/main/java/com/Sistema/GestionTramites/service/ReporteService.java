@@ -6,6 +6,7 @@ import com.Sistema.GestionTramites.dto.SolicitudesPorAreaDTO;
 import com.Sistema.GestionTramites.enums.EstadoGeneral;
 import com.Sistema.GestionTramites.enums.EstadoSolicitud;
 import com.Sistema.GestionTramites.enums.TipoUsuario;
+import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.AreaServicio;
 import com.Sistema.GestionTramites.repository.AreaServicioRepository;
 import com.Sistema.GestionTramites.repository.ServicioRepository;
@@ -50,7 +51,7 @@ public class ReporteService {
 
     public DashboardAreaDTO obtenerDashboardArea(Integer idArea) {
         AreaServicio area = areaRepository.findById(idArea)
-                .orElseThrow(() -> new RuntimeException("Área no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Área no encontrada"));
 
         Long serviciosActivos = servicioRepository.countByAreaIdAreaAndEstado(idArea, EstadoGeneral.ACTIVO);
         Long recibidas = solicitudRepository.countByServicioAreaIdAreaAndEstado(idArea, EstadoSolicitud.RECIBIDA);
