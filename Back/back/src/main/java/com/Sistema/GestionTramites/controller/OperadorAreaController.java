@@ -1,6 +1,7 @@
 package com.Sistema.GestionTramites.controller;
 
 import com.Sistema.GestionTramites.dto.OperadorAreaRequestDTO;
+import com.Sistema.GestionTramites.dto.OperadorAreaResponseDTO;
 import com.Sistema.GestionTramites.model.OperadorArea;
 import com.Sistema.GestionTramites.service.OperadorAreaService;
 import org.springframework.web.bind.annotation.*;
@@ -19,28 +20,39 @@ public class OperadorAreaController {
     }
 
     @GetMapping
-    public List<OperadorArea> listarAsignaciones() {
-        return operadorAreaService.listarAsignaciones();
+    public List<OperadorAreaResponseDTO> listarAsignaciones() {
+        return operadorAreaService.listarAsignaciones()
+                .stream()
+                .map(this::convertirAResponseDTO)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public OperadorArea obtenerAsignacion(@PathVariable Integer id) {
-        return operadorAreaService.obtenerPorId(id);
+    public OperadorAreaResponseDTO obtenerAsignacion(@PathVariable Integer id) {
+        OperadorArea operadorArea = operadorAreaService.obtenerPorId(id);
+        return convertirAResponseDTO(operadorArea);
     }
 
     @GetMapping("/operador/{idUsuario}")
-    public List<OperadorArea> listarPorOperador(@PathVariable Integer idUsuario) {
-        return operadorAreaService.listarPorOperador(idUsuario);
+    public List<OperadorAreaResponseDTO> listarPorOperador(@PathVariable Integer idUsuario) {
+        return operadorAreaService.listarPorOperador(idUsuario)
+                .stream()
+                .map(this::convertirAResponseDTO)
+                .toList();
     }
 
     @GetMapping("/area/{idArea}")
-    public List<OperadorArea> listarPorArea(@PathVariable Integer idArea) {
-        return operadorAreaService.listarPorArea(idArea);
+    public List<OperadorAreaResponseDTO> listarPorArea(@PathVariable Integer idArea) {
+        return operadorAreaService.listarPorArea(idArea)
+                .stream()
+                .map(this::convertirAResponseDTO)
+                .toList();
     }
 
     @PostMapping
-    public OperadorArea crearAsignacion(@RequestBody OperadorAreaRequestDTO dto) {
-        return operadorAreaService.crearAsignacion(dto);
+    public OperadorAreaResponseDTO crearAsignacion(@RequestBody OperadorAreaRequestDTO dto) {
+        OperadorArea operadorArea = operadorAreaService.crearAsignacion(dto);
+        return convertirAResponseDTO(operadorArea);
     }
 
     @DeleteMapping("/{id}")
@@ -54,5 +66,18 @@ public class OperadorAreaController {
             @PathVariable Integer idArea
     ) {
         operadorAreaService.eliminarAsignacionPorOperadorYArea(idUsuario, idArea);
+    }
+
+    private OperadorAreaResponseDTO convertirAResponseDTO(OperadorArea operadorArea) {
+        return new OperadorAreaResponseDTO(
+                operadorArea.getIdOperadorArea(),
+
+                operadorArea.getUsuario().getIdUsuario(),
+                operadorArea.getUsuario().getNombre(),
+                operadorArea.getUsuario().getCorreo(),
+
+                operadorArea.getArea().getIdArea(),
+                operadorArea.getArea().getNombre()
+        );
     }
 }

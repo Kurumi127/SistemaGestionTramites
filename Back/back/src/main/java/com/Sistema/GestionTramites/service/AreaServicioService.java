@@ -62,6 +62,11 @@ public class AreaServicioService {
         return areaRepository.save(area);
     }
 
+    public AreaServicio obtenerArea(Integer id) {
+        return areaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Área no encontrada"));
+    }
+
     public void eliminarArea(Integer id) {
         AreaServicio area = obtenerPorId(id);
         areaRepository.delete(area);

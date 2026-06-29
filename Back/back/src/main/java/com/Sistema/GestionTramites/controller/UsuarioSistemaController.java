@@ -1,5 +1,6 @@
 package com.Sistema.GestionTramites.controller;
 
+import com.Sistema.GestionTramites.dto.UsuarioResponseDTO;
 import com.Sistema.GestionTramites.dto.UsuarioSistemaRequestDTO;
 import com.Sistema.GestionTramites.model.UsuarioSistema;
 import com.Sistema.GestionTramites.service.UsuarioSistemaService;
@@ -20,43 +21,63 @@ public class UsuarioSistemaController {
     }
 
     @GetMapping
-    public List<UsuarioSistema> listarUsuarios() {
-        return usuarioService.listarUsuarios();
+    public List<UsuarioResponseDTO> listarUsuarios() {
+        return usuarioService.listarUsuarios()
+                .stream()
+                .map(this::convertirAResponseDTO)
+                .toList();
     }
 
     @GetMapping("/operadores")
-    public List<UsuarioSistema> listarOperadores() {
-        return usuarioService.listarOperadores();
+    public List<UsuarioResponseDTO> listarOperadores() {
+        return usuarioService.listarOperadores()
+                .stream()
+                .map(this::convertirAResponseDTO)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public UsuarioSistema obtenerUsuario(@PathVariable Integer id) {
-        return usuarioService.obtenerPorId(id);
+    public UsuarioResponseDTO obtenerUsuario(@PathVariable Integer id) {
+        UsuarioSistema usuario = usuarioService.obtenerPorId(id);
+        return convertirAResponseDTO(usuario);
     }
 
     @PostMapping
-    public UsuarioSistema crearUsuario(@RequestBody UsuarioSistemaRequestDTO dto) {
-        return usuarioService.crearUsuario(dto);
+    public UsuarioResponseDTO crearUsuario(@RequestBody UsuarioSistemaRequestDTO dto) {
+        UsuarioSistema usuario = usuarioService.crearUsuario(dto);
+        return convertirAResponseDTO(usuario);
     }
 
     @PutMapping("/{id}")
-    public UsuarioSistema editarUsuario(
+    public UsuarioResponseDTO editarUsuario(
             @PathVariable Integer id,
             @RequestBody UsuarioSistemaRequestDTO dto
     ) {
-        return usuarioService.editarUsuario(id, dto);
+        UsuarioSistema usuario = usuarioService.editarUsuario(id, dto);
+        return convertirAResponseDTO(usuario);
     }
 
     @PutMapping("/{id}/estado")
-    public UsuarioSistema cambiarEstado(
+    public UsuarioResponseDTO cambiarEstado(
             @PathVariable Integer id,
-            @RequestBody Map<String, String> body
+            @RequestParam String estado
     ) {
-        return usuarioService.cambiarEstado(id, body.get("estado"));
+        UsuarioSistema usuario = usuarioService.cambiarEstado(id, estado);
+        return convertirAResponseDTO(usuario);
     }
 
     @DeleteMapping("/{id}")
     public void eliminarUsuario(@PathVariable Integer id) {
         usuarioService.eliminarUsuario(id);
+    }
+
+    private UsuarioResponseDTO convertirAResponseDTO(UsuarioSistema usuario) {
+        return new UsuarioResponseDTO(
+                usuario.getIdUsuario(),
+                usuario.getNombre(),
+                usuario.getCorreo(),
+                usuario.getTipoUsuario().name(),
+                usuario.getEstado().name()
+        );
     }
 }

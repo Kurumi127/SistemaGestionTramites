@@ -2,16 +2,17 @@ package com.Sistema.GestionTramites.service;
 
 import com.Sistema.GestionTramites.dto.DashboardAreaDTO;
 import com.Sistema.GestionTramites.dto.DashboardGeneralDTO;
+import com.Sistema.GestionTramites.dto.DashboardOperadorDTO;
 import com.Sistema.GestionTramites.dto.SolicitudesPorAreaDTO;
 import com.Sistema.GestionTramites.enums.EstadoGeneral;
 import com.Sistema.GestionTramites.enums.EstadoSolicitud;
 import com.Sistema.GestionTramites.enums.TipoUsuario;
+import com.Sistema.GestionTramites.exeption.BadRequestException;
 import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.AreaServicio;
-import com.Sistema.GestionTramites.repository.AreaServicioRepository;
-import com.Sistema.GestionTramites.repository.ServicioRepository;
-import com.Sistema.GestionTramites.repository.SolicitudServicioRepository;
-import com.Sistema.GestionTramites.repository.UsuarioSistemaRepository;
+import com.Sistema.GestionTramites.model.SolicitudServicio;
+import com.Sistema.GestionTramites.model.UsuarioSistema;
+import com.Sistema.GestionTramites.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,17 +24,20 @@ public class ReporteService {
     private final AreaServicioRepository areaRepository;
     private final ServicioRepository servicioRepository;
     private final SolicitudServicioRepository solicitudRepository;
+    private final OperadorServicioRepository operadorServicioRepository;
 
     public ReporteService(
             UsuarioSistemaRepository usuarioRepository,
             AreaServicioRepository areaRepository,
             ServicioRepository servicioRepository,
-            SolicitudServicioRepository solicitudRepository
+            SolicitudServicioRepository solicitudRepository,
+            OperadorServicioRepository operadorServicioRepository
     ) {
         this.usuarioRepository = usuarioRepository;
         this.areaRepository = areaRepository;
         this.servicioRepository = servicioRepository;
         this.solicitudRepository = solicitudRepository;
+        this.operadorServicioRepository = operadorServicioRepository;
     }
 
     public DashboardGeneralDTO obtenerDashboardGeneral() {
@@ -69,6 +73,64 @@ public class ReporteService {
                 finalizadas,
                 canceladas,
                 total
+        );
+    }
+
+    public DashboardOperadorDTO obtenerDashboardOperador(Integer idUsuario) {
+        UsuarioSistema operador = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        if (operador.getTipoUsuario() != TipoUsuario.OPERADOR) {
+            throw new BadRequestException("El usuario no es operador");
+        }
+
+        List<Integer> idsServiciosPropios = operadorServicioRepository
+                .findByUsuarioIdUsuario(idUsuario)
+                .stream()
+                .map(operadorServicio -> operadorServicio.getServicio().getIdServicio())
+                .toList();
+
+        if (idsServiciosPropios.isEmpty()) {
+            return new DashboardOperadorDTO(
+                    operador.getIdUsuario(),
+                    operador.getNombre(),
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L
+            );
+        }
+
+        List<SolicitudServicio> solicitudes = solicitudRepository
+                .findByServicioIdServicioIn(idsServiciosPropios);
+
+        long recibidas = solicitudes.stream()
+                .filter(s -> s.getEstado() == EstadoSolicitud.RECIBIDA)
+                .count();
+
+        long enProceso = solicitudes.stream()
+                .filter(s -> s.getEstado() == EstadoSolicitud.EN_PROCESO)
+                .count();
+
+        long finalizadas = solicitudes.stream()
+                .filter(s -> s.getEstado() == EstadoSolicitud.FINALIZADA)
+                .count();
+
+        long canceladas = solicitudes.stream()
+                .filter(s -> s.getEstado() == EstadoSolicitud.CANCELADA)
+                .count();
+
+        return new DashboardOperadorDTO(
+                operador.getIdUsuario(),
+                operador.getNombre(),
+                (long) idsServiciosPropios.size(),
+                (long) solicitudes.size(),
+                recibidas,
+                enProceso,
+                finalizadas,
+                canceladas
         );
     }
 

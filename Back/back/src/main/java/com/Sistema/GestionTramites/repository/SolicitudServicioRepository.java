@@ -12,6 +12,9 @@ public interface SolicitudServicioRepository extends JpaRepository<SolicitudServ
 
     List<SolicitudServicio> findByServicioAreaIdAreaIn(List<Integer> idsAreas);
 
+    List<SolicitudServicio> findByServicioIdServicioIn(List<Integer> idsServicios);
+    
+
     long countByEstado(EstadoSolicitud estado);
 
     long countByServicioAreaIdArea(Integer idArea);

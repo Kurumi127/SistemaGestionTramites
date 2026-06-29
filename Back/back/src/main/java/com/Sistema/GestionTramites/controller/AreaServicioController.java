@@ -1,8 +1,11 @@
 package com.Sistema.GestionTramites.controller;
+
+import com.Sistema.GestionTramites.dto.AreaResponseDTO;
 import com.Sistema.GestionTramites.dto.AreaServicioRequestDTO;
 import com.Sistema.GestionTramites.model.AreaServicio;
 import com.Sistema.GestionTramites.service.AreaServicioService;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 import java.util.Map;
@@ -19,38 +22,54 @@ public class AreaServicioController {
     }
 
     @GetMapping
-    public List<AreaServicio> listarAreas() {
-        return areaService.listarAreas();
+    public List<AreaResponseDTO> listarAreas() {
+        return areaService.listarAreas()
+                .stream()
+                .map(this::convertirAResponseDTO)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public AreaServicio obtenerArea(@PathVariable Integer id) {
-        return areaService.obtenerPorId(id);
+    public AreaResponseDTO obtenerArea(@PathVariable Integer id) {
+        AreaServicio area = areaService.obtenerArea(id);
+        return convertirAResponseDTO(area);
     }
 
     @PostMapping
-    public AreaServicio crearArea(@RequestBody AreaServicioRequestDTO dto) {
-        return areaService.crearArea(dto);
+    public AreaResponseDTO crearArea(@RequestBody AreaServicioRequestDTO dto) {
+        AreaServicio area = areaService.crearArea(dto);
+        return convertirAResponseDTO(area);
     }
 
     @PutMapping("/{id}")
-    public AreaServicio editarArea(
+    public AreaResponseDTO editarArea(
             @PathVariable Integer id,
             @RequestBody AreaServicioRequestDTO dto
     ) {
-        return areaService.editarArea(id, dto);
+        AreaServicio area = areaService.editarArea(id, dto);
+        return convertirAResponseDTO(area);
     }
 
     @PutMapping("/{id}/estado")
-    public AreaServicio cambiarEstado(
+    public AreaResponseDTO cambiarEstado(
             @PathVariable Integer id,
-            @RequestBody Map<String, String> body
+            @RequestParam String estado
     ) {
-        return areaService.cambiarEstado(id, body.get("estado"));
+        AreaServicio area = areaService.cambiarEstado(id, estado);
+        return convertirAResponseDTO(area);
     }
 
     @DeleteMapping("/{id}")
     public void eliminarArea(@PathVariable Integer id) {
         areaService.eliminarArea(id);
+    }
+
+    private AreaResponseDTO convertirAResponseDTO(AreaServicio area) {
+        return new AreaResponseDTO(
+                area.getIdArea(),
+                area.getNombre(),
+                area.getDescripcion(),
+                area.getEstado().name()
+        );
     }
 }

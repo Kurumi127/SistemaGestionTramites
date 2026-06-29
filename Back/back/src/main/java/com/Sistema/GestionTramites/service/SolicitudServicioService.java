@@ -3,6 +3,8 @@ package com.Sistema.GestionTramites.service;
 import com.Sistema.GestionTramites.dto.ActualizarEstadoSolicitudDTO;
 import com.Sistema.GestionTramites.dto.SolicitudRequestDTO;
 import com.Sistema.GestionTramites.enums.EstadoSolicitud;
+import com.Sistema.GestionTramites.enums.TipoUsuario;
+import com.Sistema.GestionTramites.exeption.BadRequestException;
 import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.*;
 import com.Sistema.GestionTramites.repository.*;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class SolicitudServicioService {
@@ -19,19 +22,36 @@ public class SolicitudServicioService {
     private final ServicioRepository servicioRepository;
     private final UsuarioSistemaRepository usuarioRepository;
     private final HistorialSolicitudRepository historialRepository;
+    private final OperadorServicioRepository operadorServicioRepository;
 
     public SolicitudServicioService(
             SolicitudServicioRepository solicitudRepository,
             SolicitanteRepository solicitanteRepository,
             ServicioRepository servicioRepository,
             UsuarioSistemaRepository usuarioRepository,
-            HistorialSolicitudRepository historialRepository
+            HistorialSolicitudRepository historialRepository,
+            OperadorServicioRepository operadorServicioRepository
     ) {
         this.solicitudRepository = solicitudRepository;
         this.solicitanteRepository = solicitanteRepository;
         this.servicioRepository = servicioRepository;
         this.usuarioRepository = usuarioRepository;
         this.historialRepository = historialRepository;
+        this.operadorServicioRepository = operadorServicioRepository;
+    }
+
+    private void validarServicioPropioDelOperador(UsuarioSistema usuario, Servicio servicio) {
+        if (usuario.getTipoUsuario() == TipoUsuario.OPERADOR) {
+            boolean servicioPropio = operadorServicioRepository
+                    .existsByUsuarioIdUsuarioAndServicioIdServicio(
+                            usuario.getIdUsuario(),
+                            servicio.getIdServicio()
+                    );
+
+            if (!servicioPropio) {
+                throw new BadRequestException("El operador solo puede registrar solicitudes de servicios marcados como propios");
+            }
+        }
     }
 
     public SolicitudServicio crearSolicitud(SolicitudRequestDTO dto) {
@@ -40,6 +60,8 @@ public class SolicitudServicioService {
 
         UsuarioSistema usuario = usuarioRepository.findById(dto.getIdUsuarioRegistra())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        validarServicioPropioDelOperador(usuario, servicio);
 
         Solicitante solicitante = new Solicitante();
         solicitante.setNombreCompleto(dto.getNombreCompleto());
@@ -120,5 +142,18 @@ public class SolicitudServicioService {
         int anio = LocalDate.now().getYear();
 
         return String.format("%s-%d-%04d", prefijoArea, anio, totalSolicitudes);
+    }
+
+    public List<SolicitudServicio> listarSolicitudes() {
+        return solicitudRepository.findAll();
+    }
+
+    public SolicitudServicio obtenerSolicitud(Integer id) {
+        return solicitudRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
+    }
+
+    public List<SolicitudServicio> listarSolicitudesPorArea(Integer idArea) {
+        return solicitudRepository.findByServicioAreaIdArea(idArea);
     }
 }

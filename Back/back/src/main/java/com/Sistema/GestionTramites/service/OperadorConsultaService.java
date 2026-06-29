@@ -4,10 +4,7 @@ import com.Sistema.GestionTramites.enums.TipoUsuario;
 import com.Sistema.GestionTramites.exeption.BadRequestException;
 import com.Sistema.GestionTramites.exeption.ResourceNotFoundException;
 import com.Sistema.GestionTramites.model.*;
-import com.Sistema.GestionTramites.repository.OperadorAreaRepository;
-import com.Sistema.GestionTramites.repository.ServicioRepository;
-import com.Sistema.GestionTramites.repository.SolicitudServicioRepository;
-import com.Sistema.GestionTramites.repository.UsuarioSistemaRepository;
+import com.Sistema.GestionTramites.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,17 +16,20 @@ public class OperadorConsultaService {
     private final OperadorAreaRepository operadorAreaRepository;
     private final ServicioRepository servicioRepository;
     private final SolicitudServicioRepository solicitudesRepository;
+    private final OperadorServicioRepository operadorServicioRepository;
 
     public OperadorConsultaService(
             UsuarioSistemaRepository usuarioRepository,
             OperadorAreaRepository operadorAreaRepository,
             ServicioRepository servicioRepository,
-            SolicitudServicioRepository solicitudesRepository
+            SolicitudServicioRepository solicitudesRepository,
+            OperadorServicioRepository operadorServicioRepository
     ) {
         this.usuarioRepository = usuarioRepository;
         this.operadorAreaRepository = operadorAreaRepository;
         this.servicioRepository = servicioRepository;
         this.solicitudesRepository = solicitudesRepository;
+        this.operadorServicioRepository = operadorServicioRepository;
     }
 
     public List<AreaServicio> obtenerAreasDelOperador(Integer idUsuario) {
@@ -58,8 +58,19 @@ public class OperadorConsultaService {
             return List.of();
         }
 
-        return solicitudesRepository.findByServicioAreaIdAreaIn(idsAreas);
+        List<Integer> idsServiciosPropios = operadorServicioRepository
+                .findByUsuarioIdUsuario(idUsuario)
+                .stream()
+                .map(operadorServicio -> operadorServicio.getServicio().getIdServicio())
+                .toList();
+
+        if (idsServiciosPropios.isEmpty()) {
+            return List.of();
+        }
+
+        return solicitudesRepository.findByServicioIdServicioIn(idsServiciosPropios);
     }
+
 
     private List<Integer> obtenerIdsAreasDelOperador(Integer idUsuario) {
         UsuarioSistema usuario = validarOperador(idUsuario);

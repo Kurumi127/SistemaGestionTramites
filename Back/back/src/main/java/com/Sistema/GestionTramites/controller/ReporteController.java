@@ -2,6 +2,7 @@ package com.Sistema.GestionTramites.controller;
 
 import com.Sistema.GestionTramites.dto.DashboardAreaDTO;
 import com.Sistema.GestionTramites.dto.DashboardGeneralDTO;
+import com.Sistema.GestionTramites.dto.DashboardOperadorDTO;
 import com.Sistema.GestionTramites.dto.SolicitudesPorAreaDTO;
 import com.Sistema.GestionTramites.service.ReporteService;
 import org.springframework.web.bind.annotation.*;
@@ -32,5 +33,10 @@ public class ReporteController {
     @GetMapping("/solicitudes-por-area")
     public List<SolicitudesPorAreaDTO> obtenerSolicitudesPorArea() {
         return reporteService.obtenerSolicitudesPorArea();
+    }
+
+    @GetMapping("/dashboard-operador/{idUsuario}")
+    public DashboardOperadorDTO obtenerDashboardOperador(@PathVariable Integer idUsuario) {
+        return reporteService.obtenerDashboardOperador(idUsuario);
     }
 }
