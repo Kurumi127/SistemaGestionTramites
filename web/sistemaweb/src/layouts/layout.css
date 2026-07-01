@@ -1,0 +1,77 @@
+.layout {
+    width: 100%;
+  min-height: 100vh;
+  display: flex;
+  background: #f4f6f8;
+}
+
+.sidebar {
+  width: 260px;
+  background: #ffffff;
+  color: white;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 24px;
+}
+
+.usuario {
+  background: #c3c3c3;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.usuario span {
+  display: block;
+  font-size: 12px;
+  color: #d1d5db;
+  margin-top: 4px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu a {
+  color: #e5e7eb;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.menu a:hover {
+  background: #6b6b6b;
+}
+
+.menu a.active {
+  background: #080808;
+  color: white;
+}
+
+.logout {
+  margin-top: auto;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #dc2626;
+  color: white;
+  cursor: pointer;
+}
+
+.logout:hover {
+  background: #b91c1c;
+}
+
+.contenido {
+  flex: 1;
+  padding: 28px;
+}
